@@ -1,0 +1,38 @@
+# Builds the site from every tool's docs (shallow clones) and publishes it with GitHub Pages.
+# Runs only when started by hand until the owner turns on the push trigger.
+name: Pages
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+  # repository_dispatch:
+  #   types: [docs-updated]   # a tool repo can ping this after changing docs/ar
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - run: warraq-site build --sync --from git --strict
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

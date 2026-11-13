@@ -1,0 +1,61 @@
+{% from "icons.html" import ui_icon, mark %}
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}{{ page.title }} · {{ cfg.title if lang == "ar" else cfg.title_en }}{% endblock %}</title>
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ canonical }}">
+{% if twin %}<link rel="alternate" hreflang="{{ 'en' if lang == 'ar' else 'ar' }}" href="{{ cfg.site_url.rstrip('/') }}{{ twin }}">{% endif %}
+{% if page and page.draft %}<meta name="warraq:draft" content="true">{% endif %}
+<meta property="og:title" content="{{ self.title() }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="{{ 'ar_AR' if lang == 'ar' else 'en_US' }}">
+<meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16140f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/readex-pro-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/site.css?v={{ v }}">
+<script>try{var t=localStorage.getItem("warraq-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip" href="#main">{{ ui.skip }}</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="{{ home }}">{{ mark(30) }}<span>{{ cfg.title if lang == "ar" else cfg.title_en }}</span></a>
+    <nav class="top-nav" aria-label="{{ ui.menu }}">
+      <a href="{{ home }}#tools">{{ ui.tools }}</a>
+      <a href="/tutorial/">{{ ui.tutorial }}</a>
+      <a href="/about/">{{ ui.about }}</a>
+    </nav>
+    <div class="top-tools">
+      <button class="icon-btn" type="button" data-search-open aria-label="{{ ui.search }}" title="{{ ui.search }} ( / )">{{ ui_icon("search") }}</button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="{{ ui.theme }}" title="{{ ui.theme }}">{{ ui_icon("theme") }}</button>
+      {% if twin %}<a class="lang" href="{{ twin }}" hreflang="{{ 'en' if lang == 'ar' else 'ar' }}" lang="{{ 'en' if lang == 'ar' else 'ar' }}">{{ ui.switch }}</a>{% endif %}
+      <a class="icon-btn" href="{{ cfg.github }}" aria-label="GitHub" rel="noopener">{{ ui_icon("github") }}</a>
+    </div>
+  </div>
+</header>
+{% block main %}{% endblock %}
+<footer class="foot">
+  <div class="foot-in">
+    <p class="foot-brand">{{ mark(24) }} <strong>{{ cfg.title if lang == "ar" else cfg.title_en }}</strong> — {{ cfg.description if lang == "ar" else cfg.description_en }}</p>
+    <nav class="foot-tools">{% for t in tools %}{% if t.url %}<a href="{{ t.url }}" dir="ltr">{{ t.slug }}</a>{% endif %}{% endfor %}</nav>
+    <p class="foot-meta">{{ ui.footer_code }} · <a href="{{ cfg.library_site }}">{{ ui.library }}</a> · <a href="{{ cfg.main_site }}">benjelloun.dev</a></p>
+  </div>
+</footer>
+<dialog class="search" id="search" aria-label="{{ ui.search }}">
+  <form method="dialog" class="search-box" role="search">
+    {{ ui_icon("search") }}
+    <input type="search" id="q" placeholder="{{ ui.search_ph }}" autocomplete="off" aria-label="{{ ui.search }}" enterkeyhint="search">
+    <button class="esc" value="close" aria-label="إغلاق">Esc</button>
+  </form>
+  <ol class="results" id="results" aria-live="polite"></ol>
+  <p class="no-results" id="no-results" hidden>{{ ui.no_results }}</p>
+</dialog>
+<script src="/assets/js/site.js?v={{ v }}" defer data-index="{{ '/en/search.json' if lang == 'en' else '/search.json' }}"></script>
+</body>
+</html>

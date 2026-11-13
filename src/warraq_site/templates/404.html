@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ ui.notfound }} · {{ cfg.title }}{% endblock %}
+{% block body_class %}doc{% endblock %}
+{% block main %}
+<main id="main" class="content narrow">
+  <article class="prose">
+    <h1>{{ ui.notfound }}</h1>
+    <p class="lead">ربما نُقلت الصفحة أو تغيّر اسمها. ابحث عمّا تريد، أو عُد إلى <a href="/">الصفحة الرئيسية</a>.</p>
+    <p><button class="btn primary" type="button" data-search-open>{{ ui.search }}</button></p>
+  </article>
+</main>
+{% endblock %}

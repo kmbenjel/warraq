@@ -1,0 +1,63 @@
+# Warraq docs site: configuration read by `python -m warraq_site`.
+site_url: https://warraq.benjelloun.dev/
+cname: warraq.benjelloun.dev
+title: ورّاق
+title_en: Warraq
+description: أدوات مفتوحة لبناء المكتبات التراثية الرقمية والعناية بها، من مجلد المسوح إلى فهرس على الهاتف.
+description_en: Open tools to build and care for digital heritage libraries, from a folder of scans to a catalogue on your phone.
+main_site: https://benjelloun.dev/
+library_site: https://benjelloun.dev/library
+github: https://github.com/kmbenjel
+
+# Where the sync script finds each tool's docs/ar and docs/media.
+# `local` is relative to this file; `git` is used with `sync --from git` (CI).
+sources:
+  local: ..
+  git: https://github.com/kmbenjel/{slug}.git
+
+# The order here is the order of the cards and of the path on the landing page.
+tools:
+  - slug: safha
+    gloss: صفحة
+    step: تنظيف الصفحات
+    pitch: قصٌّ وتقويمٌ وتقسيمٌ لصفحات الكتب المصوّرة دون إعادة ترميز صورة واحدة، فيقرؤها الهاتف والقارئ الإلكتروني بلا هوامش.
+    pitch_en: Lossless crop, deskew, split and page-drop for scanned PDFs.
+  - slug: arabic-bib
+    gloss: الببليوغرافيا العربية
+    step: التسمية
+    pitch: تسميةٌ ببليوغرافيةٌ منضبطة للعنوان والمؤلف والمحقق والناشر، مع سنوات الوفاة والتاريخ الهجري وأسماء ملفات آمنة.
+    pitch_en: Arabic bibliographic text — normalisation, name composition and audit, death years, Hijri dates.
+  - slug: turath-match
+    gloss: مطابقة التراث
+    step: المطابقة والنسبة
+    pitch: مطابقة مكتبتك بالشاملة والوقفية وأرشيف الإنترنت بالدليل، ونسبة كل ملف إلى مصدره بحجمه الدقيق، وإثبات المكرّر بعيّنات من بايتاته.
+    pitch_en: Catalogue reconciliation across Shamela, Waqfeya, archive.org and your own CSV, with evidence.
+  - slug: turath-catalog
+    gloss: فهرس التراث
+    step: المطابقة والنسبة
+    pitch: بياناتٌ ببليوغرافيةٌ مفتوحة عن الأعمال والطبعات والمؤلفين ووفياتهم والمحققين، دون نصوص الكتب، بصيغ CSV وParquet.
+    pitch_en: An open bibliographic dataset — works, editions, authors, editors — metadata only.
+  - slug: planfs
+    gloss: خطة الملفات
+    step: الترتيب
+    pitch: خطةٌ تراها قبل أن تنفّذها؛ نقلُ الملفات وتسميتُها وحذفُها بجدولٍ واحد، مع سجلٍّ لا يُمحى وتراجعٍ بأمرٍ واحد.
+    pitch_en: terraform plan for your files — dry run, append-only log and undo, on disk or any rclone remote.
+  - slug: pocketshelf
+    gloss: رفّ الجيب
+    step: الفهرسة
+    pitch: مجلدٌ من ملفات PDF وEPUB يصير فهرسًا واحدًا يعمل في متصفح الهاتف دون إنترنت؛ بحثٌ وأقسامٌ ومؤلفون على القرون.
+    pitch_en: Any folder of PDFs and EPUBs becomes one self-contained offline HTML catalogue.
+  - slug: agent-workbench
+    gloss: منضدة الوكيل
+    step: الإشراف
+    pitch: عُدّةٌ لإشراف الإنسان على أعمال الوكلاء الطويلة؛ صفحات مراجعة بالتأشير والتعليق، وضبطٌ للذاكرة والشبكة، وطابورُ تنزيلٍ يُستأنف.
+    pitch_en: Human-in-the-loop kit for long AI-agent jobs — review pages, memory governor, resumable queue.
+
+# Sidebar labels for the pages every tool has (other pages use their own title).
+tool_pages:
+  index: نظرة عامة
+  why: ما الذي يميّزه؟
+  install: التثبيت
+  quickstart: البدء السريع
+  guides: أدلة
+  faq: أسئلة شائعة

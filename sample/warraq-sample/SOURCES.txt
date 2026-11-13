@@ -1,0 +1,2 @@
+Texts (public domain): al-Nawawi (d. 676 AH), al-Arba'un, hadith 1; al-Shanfara (6th c. CE), Lamiyyat al-Arab, lines 1-4; Ibn Ajurrum (d. 723 AH), al-Ajurrumiyya, opening chapter.
+Typeset and 'scanned' by make_sample.py in the warraq repository; released under CC0.

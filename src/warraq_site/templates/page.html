@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "icons.html" import tool_icon %}
+{% block title %}{{ page.title }}{% if tool %} · {{ tool.slug }}{% endif %} · {{ cfg.title if lang == "ar" else cfg.title_en }}{% endblock %}
+{% block body_class %}doc{% if nav %} has-nav{% endif %}{% if toc and toc|length > 1 %} has-toc{% endif %}{% endblock %}
+{% macro nav_list(items) -%}
+<ul>
+{% for n in items %}
+  {% if n.children %}
+  <li class="group"><details{% if n.open %} open{% endif %}><summary>{{ n.title }}</summary>{{ nav_list(n.children) }}</details></li>
+  {% else %}
+  <li><a href="{{ n.url }}"{% if n.current %} aria-current="page"{% endif %}>{{ n.title }}</a></li>
+  {% endif %}
+{% endfor %}
+</ul>
+{%- endmacro %}
+{% block main %}
+<div class="doc-grid">
+{% if nav %}
+  <aside class="side" aria-label="{{ ui.in_section }}">
+    <details class="side-box" data-side open>
+      <summary>
+        {% if tool %}{{ tool_icon(tool.slug, 22) }}<span dir="ltr">{{ tool.slug }}</span><small>{{ tool.gloss }}</small>{% else %}<span>{{ ui.tutorial }}</span>{% endif %}
+      </summary>
+      <nav class="side-nav">{{ nav_list(nav) }}</nav>
+      {% if tool %}
+      <p class="side-label">{{ ui.other_tools }}</p>
+      <ul class="side-tools">
+        {% for t in tools if t.slug != tool.slug and t.url %}<li><a href="{{ t.url }}">{{ tool_icon(t.slug, 18) }}<span dir="ltr">{{ t.slug }}</span></a></li>{% endfor %}
+      </ul>
+      {% endif %}
+    </details>
+  </aside>
+{% endif %}
+  <main id="main" class="content">
+    {% if tool %}<p class="crumb"><a href="{{ home }}">{{ ui.home }}</a> <span aria-hidden="true">›</span> <a href="{{ tool.url }}" dir="ltr">{{ tool.slug }}</a></p>{% endif %}
+    <article class="prose">
+      <h1>{{ page.title }}</h1>
+      {% if page.meta.description and page.meta.lead is not sameas false %}<p class="lead">{{ page.meta.description }}</p>{% endif %}
+      {{ content|safe }}
+    </article>
+    {% if prev or next %}
+    <nav class="pager" aria-label="{{ ui.prev }} / {{ ui.next }}">
+      {% if prev %}<a class="prev" href="{{ prev.url }}"><small>{{ ui.prev }}</small>{{ prev.title }}</a>{% else %}<span></span>{% endif %}
+      {% if next %}<a class="next" href="{{ next.url }}"><small>{{ ui.next }}</small>{{ next.title }}</a>{% endif %}
+    </nav>
+    {% endif %}
+    <p class="edit"><a href="{{ edit }}" rel="noopener">{{ ui.edit }}</a></p>
+  </main>
+{% if toc and toc|length > 1 %}
+  <aside class="toc" aria-label="{{ ui.on_page }}">
+    <p>{{ ui.on_page }}</p>
+    <ul>
+    {% for h in toc %}
+      <li><a href="#{{ h.id }}">{{ h.name|striptags }}</a>
+      {% if h.children %}<ul>{% for c in h.children %}<li><a href="#{{ c.id }}">{{ c.name|striptags }}</a></li>{% endfor %}</ul>{% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  </aside>
+{% endif %}
+</div>
+{% endblock %}

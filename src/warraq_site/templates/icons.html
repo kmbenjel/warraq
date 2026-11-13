@@ -1,0 +1,33 @@
+{% macro tool_icon(slug, size=40) -%}
+<svg class="ticon" width="{{ size }}" height="{{ size }}" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{% if slug == "safha" %}
+  <rect x="12" y="9" width="24" height="30" rx="2"/><path d="M6 14h6M14 6v6M42 34h-6M34 42v-6"/><path d="M17 17h14M17 22h14M17 27h10"/>
+{% elif slug == "arabic-bib" %}
+  <path d="M8 24 22 10h16v16L24 40Z"/><circle cx="31" cy="17" r="2.6"/><path d="M17 26l5 5M21 22l5 5"/>
+{% elif slug == "turath-match" %}
+  <rect x="6" y="10" width="16" height="22" rx="2"/><rect x="26" y="16" width="16" height="22" rx="2"/><path d="M15 36v4h18M33 12V8H15"/><path d="M11 17h6M11 22h6M31 23h6M31 28h6"/>
+{% elif slug == "turath-catalog" %}
+  <ellipse cx="24" cy="11" rx="14" ry="5"/><path d="M10 11v26c0 2.8 6.3 5 14 5s14-2.2 14-5V11"/><path d="M10 20c0 2.8 6.3 5 14 5s14-2.2 14-5M10 29c0 2.8 6.3 5 14 5s14-2.2 14-5"/>
+{% elif slug == "planfs" %}
+  <rect x="9" y="7" width="30" height="34" rx="3"/><path d="M15 16h4M15 24h4M15 32h4"/><path d="M24 16h9M24 24h9M24 32h5"/><path d="M33 30l3 3-3 3"/>
+{% elif slug == "pocketshelf" %}
+  <rect x="13" y="4" width="22" height="40" rx="4"/><path d="M21 39h6"/><path d="M18 12v16M22 12v16M26 13l3 15"/><path d="M17 30h14"/>
+{% elif slug == "agent-workbench" %}
+  <rect x="5" y="9" width="38" height="28" rx="3"/><path d="M5 16h38"/><path d="M14 27l4 4 8-9"/><path d="M30 25h7M30 30h5"/><path d="M18 42h12"/>
+{% else %}
+  <circle cx="24" cy="24" r="16"/>
+{% endif %}
+</svg>
+{%- endmacro %}
+
+{% macro ui_icon(name) -%}
+{% if name == "search" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg>
+{% elif name == "theme" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+{% elif name == "menu" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+{% elif name == "github" %}<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>
+{% endif %}
+{%- endmacro %}
+
+{% macro mark(size=34) -%}
+<svg width="{{ size }}" height="{{ size }}" viewBox="0 0 64 64" aria-hidden="true" class="mark"><rect width="64" height="64" rx="14" fill="var(--mark-bg)"/><rect x="5" y="5" width="54" height="54" rx="11" fill="none" stroke="var(--ink)" stroke-width="3.5"/><path d="M45 17 24 44l-4 7 7-4 21-27a2.1 2.1 0 0 0-3-3Z" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linejoin="round"/><path d="M14 48h14" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"/></svg>
+{%- endmacro %}

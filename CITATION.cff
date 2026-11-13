@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: If you cite the Warraq tools or their documentation, please cite it as below.
+title: "Warraq: open tools for digital heritage libraries (documentation site)"
+authors:
+  - family-names: Benjelloun
+    given-names: Khalid
+license: MIT
+repository-code: https://github.com/kmbenjel/warraq
+url: https://warraq.benjelloun.dev/
+version: 0.1.0

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% from "icons.html" import tool_icon %}
+{% set m = page.meta %}
+{% block title %}{{ cfg.title if lang == "ar" else cfg.title_en }} — {{ m.tagline }}{% endblock %}
+{% block body_class %}landing{% endblock %}
+{% block main %}
+<main id="main">
+  <section class="hero">
+    <div class="hero-in">
+      <p class="kicker">{{ m.hero.kicker }}</p>
+      <h1>{{ m.hero.title }}</h1>
+      <p class="hero-lead">{{ m.hero.lead }}</p>
+      <p class="cta">
+        <a class="btn primary" href="{{ m.hero.primary.url }}">{{ m.hero.primary.label }}</a>
+        <a class="btn" href="{{ m.hero.secondary.url }}">{{ m.hero.secondary.label }}</a>
+      </p>
+      <dl class="stats">
+        {% for s in m.stats %}<div><dt>{{ s.label }}</dt><dd>{{ s.value }}</dd></div>{% endfor %}
+      </dl>
+    </div>
+  </section>
+
+  <section class="band path" id="path" aria-labelledby="path-h">
+    <div class="band-in">
+      <h2 id="path-h">{{ m.path.title }}</h2>
+      <p class="band-lead">{{ m.path.lead }}</p>
+      <ol class="steps">
+        {% for s in m.path.steps %}
+        <li>
+          <span class="step-n" aria-hidden="true">{{ loop.index }}</span>
+          <div>
+            <h3>{{ s.title }}</h3>
+            <p>{{ s.text }}</p>
+            {% if s.tools %}<p class="step-tools">{% for slug in s.tools %}{% for t in tools if t.slug == slug %}<a href="{{ t.url }}" class="chip">{{ tool_icon(slug, 16) }}<span dir="ltr">{{ slug }}</span></a>{% endfor %}{% endfor %}</p>{% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+      <p class="path-note">{{ m.path.note }}</p>
+    </div>
+  </section>
+
+  <section class="band" id="tools" aria-labelledby="tools-h">
+    <div class="band-in">
+      <h2 id="tools-h">{{ m.cards.title }}</h2>
+      <p class="band-lead">{{ m.cards.lead }}</p>
+      <ul class="cards">
+        {% for t in tools %}
+        <li class="card">
+          <a href="{{ t.url }}" class="card-link">
+            <div class="card-media{% if not t.card %} card-art{% endif %}">
+              {% if t.card %}<img src="{{ t.card }}" alt="" decoding="async" width="600" height="375">{% else %}{{ tool_icon(t.slug, 64) }}{% endif %}
+            </div>
+            <div class="card-body">
+              <h3><span dir="ltr">{{ t.slug }}</span> <small>{{ t.gloss }}</small></h3>
+              <p>{{ t.pitch }}</p>
+              <p class="card-step">{{ t.step }}</p>
+            </div>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band values" id="why" aria-labelledby="why-h">
+    <div class="band-in">
+      <h2 id="why-h">{{ m["values"].title }}</h2>
+      <p class="band-lead">{{ m["values"].lead }}</p>
+      <ul class="value-grid">
+        {% for v in m["values"]["items"] %}<li><h3>{{ v.title }}</h3><p>{{ v.text }}</p></li>{% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="compare" aria-labelledby="compare-h">
+    <div class="band-in">
+      <h2 id="compare-h">{{ m.compare.title }}</h2>
+      <p class="band-lead">{{ m.compare.lead }}</p>
+      <div class="table-wrap compare">
+        <table>
+          <thead><tr>{% for h in m.compare.head %}<th scope="col">{{ h }}</th>{% endfor %}</tr></thead>
+          <tbody>
+          {% for r in m.compare.rows %}<tr><th scope="row">{{ r[0] }}</th><td>{{ r[1] }}</td><td>{{ r[2] }}</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band story" id="story" aria-labelledby="story-h">
+    <div class="band-in prose">
+      <h2 id="story-h">{{ m.story_title }}</h2>
+      {{ content|safe }}
+    </div>
+  </section>
+</main>
+{% endblock %}

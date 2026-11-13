@@ -25,4 +25,4 @@ draft: true
 - [ما الذي يميّزها؟](why.md)
 - [التثبيت](install.md)
 - [البدء السريع](quickstart.md)
-- [الفهرس على أندرويد](guides/open-on-android.md)
+- [الفهرس على أندرويد](guides/android.md)

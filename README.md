@@ -79,13 +79,13 @@ MkDocs Material was the obvious candidate: mature, good RTL support, built-in se
    Eastern digits) and strip attached clitics (و ف ب ك ل ال) from the query. Material's search is built on lunr
    with per-language stemmers; matching our fold rule for rule would have meant a custom tokenizer inside a theme we
    do not control. Here the fold is one Python function and its JavaScript mirror, and a test runs both on the same
-   strings (`tests/test_textnorm.py`, with Node). The index is plain JSON (about 100 KB today), fetched on first search.
+   strings (`tests/test_textnorm.py`, with Node). The index is plain JSON (about 220 KB), fetched on first search.
 2. **The sync-and-overlay model is the core need**: seven repositories own their pages, drafts fill the gaps, links
    are checked across repositories. That is a few dozen lines on top of a generator, and awkward as a plugin.
 3. **The family look, phone first, RTL first.** The pages share the palette of the library index and of
    benjelloun.dev, use logical CSS properties throughout, and keep a slim sticky bar on phones; one stylesheet, no
    theme to override.
-4. **Small and fast**: three runtime dependencies; the whole site (53 pages) builds in about a second.
+4. **Small and fast**: three runtime dependencies; the whole site (about 75 pages with every tool's docs) builds in about a second.
 
 The cost is that we own the code and have no plugin ecosystem. The content is plain Markdown with YAML front matter
 and Python-Markdown admonitions, so moving to MkDocs later stays cheap.

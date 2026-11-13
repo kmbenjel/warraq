@@ -124,8 +124,8 @@ names. `sample/make_sample.py` generates it; it is released under CC0.
 ## Deploying
 
 The site is built for GitHub Pages under the custom domain `warraq.benjelloun.dev`, served from the root (the build
-writes the `CNAME` file). `.github/workflows/pages.yml` builds from shallow clones of every tool and deploys; it runs
-only when started by hand until its push trigger is turned on.
+writes the `CNAME` file). `.github/workflows/pages.yml` builds from shallow clones of every tool and deploys; it is
+started by hand (`workflow_dispatch`), and its push trigger is one uncommented line away.
 
 ## Roadmap
 

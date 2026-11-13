@@ -10,7 +10,7 @@ draft: true
 ## ابنِ الفهرس
 
 ```bash
-uvx pocketshelf build my-library --profile warraq --lang ar -o my-library/الفهرس.html
+uvx pocketshelf build . --profile warraq --lang ar -o الفهرس.html
 ```
 
 يقرأ الإعداد `warraq` أسماء الملفات على قاعدة التسمية التي طبّقتها، فيعرف من كل اسمٍ العنوانَ والمؤلفَ والمحققَ والناشر، ومن المجلد القسم.

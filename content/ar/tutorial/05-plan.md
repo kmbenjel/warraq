@@ -13,9 +13,9 @@ draft: true
 
 ```text
 action	from	to	reason
-move	scans/scan_0007.pdf	متون الحديث/الأربعون النووية - يحيى بن شرف النووي - عينة ورّاق.pdf	الاسم من catalog.csv
-move	scans/lamiya-final(2).pdf	الشعر ودواوينه/لامية العرب - الشنفرى - عينة ورّاق.pdf	الاسم من catalog.csv
-move	scans/ajrumiya_ar.pdf	النحو والصرف/متن الآجرومية - محمد بن محمد بن آجروم الصنهاجي - عينة ورّاق.pdf	الاسم من catalog.csv
+move	scans/scan_0007.pdf	متون الحديث/الأربعون النووية - يحيى بن شرف النووي.pdf	الاسم من catalog.csv
+move	scans/lamiya-final(2).pdf	الشعر ودواوينه/لامية العرب - الشنفرى.pdf	الاسم من catalog.csv
+move	scans/ajrumiya_ar.pdf	النحو والصرف/متن الآجرومية - محمد بن محمد بن آجروم الصنهاجي.pdf	الاسم من catalog.csv
 delete	scans/lamiya-final(2) - Copy.pdf		مكرّر ثبت بعيّنات البايتات
 ```
 
@@ -23,8 +23,10 @@ delete	scans/lamiya-final(2) - Copy.pdf		مكرّر ثبت بعيّنات الب
 
 ## عاين قبل أن تطبّق
 
+المعاينة هي الأمر الافتراضي: اسم الخطة والمجلد الذي تُطبَّق عليه (`-t .` أي المجلد الحالي):
+
 ```bash
-uvx planfs apply plans/001-sample-names.tsv --dry-run
+uvx planfs plans/001-sample-names.tsv -t .
 ```
 
 تعرض المعاينة كل عمليةٍ كما ستقع، وتنبّهك إن كان الهدف موجودًا من قبل، أو كان المصدر مفقودًا، أو كان الاسم لا يصلح على نظام الملفات الذي تكتب إليه.
@@ -32,10 +34,10 @@ uvx planfs apply plans/001-sample-names.tsv --dry-run
 ## طبّق
 
 ```bash
-uvx planfs apply plans/001-sample-names.tsv
+uvx planfs apply plans/001-sample-names.tsv -t .
 ```
 
-كل عمليةٍ تُكتب في سجلٍّ يُضاف إليه ولا يُمحى منه: الوقت، والعملية، والمصدر، والهدف، والسبب، واسم الخطة. والملف المحذوف لا يضيع، بل يُنقل إلى مجلد الحجر حتى تقرّر.
+تُعرض المعاينة مرةً أخرى، ولا يبدأ التنفيذ إلا إذا كتبت `yes`. كل عمليةٍ تُكتب في سجلٍّ يُضاف إليه ولا يُمحى منه: الوقت، والعملية، والمصدر، والهدف، والسبب، واسم الخطة. والملف المحذوف لا يضيع، بل يُنقل إلى مجلد الحجر حتى تقرّر.
 
 ## تراجع إن شئت
 

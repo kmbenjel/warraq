@@ -34,7 +34,7 @@
   <main id="main" class="content">
     {% if tool %}<p class="crumb"><a href="{{ home }}">{{ ui.home }}</a> <span aria-hidden="true">›</span> <a href="{{ tool.url }}" dir="ltr">{{ tool.slug }}</a></p>{% endif %}
     <article class="prose">
-      <h1>{{ page.title }}</h1>
+      <h1>{{ page.meta.heading or page.title }}</h1>
       {% if page.meta.description and page.meta.lead is not sameas false %}<p class="lead">{{ page.meta.description }}</p>{% endif %}
       {{ content|safe }}
     </article>

@@ -153,6 +153,11 @@ def _load(key: str, f: Path, lang: str, url: str, tool: str | None) -> Page:
         meta, body = split_front_matter(text, key)
     except FrontMatterError as e:  # keep building; the problem is reported with the others
         meta, body = {"_error": str(e)}, text.split("\n---", 2)[-1]
+    # A page that opens with its own "# Heading" keeps it as the page heading (the template prints one h1).
+    first = body.lstrip("\n").split("\n", 1)
+    if first[0].startswith("# "):
+        meta.setdefault("heading", first[0][2:].strip().rstrip("#").strip())
+        body = first[1] if len(first) > 1 else ""
     return Page(key=key, file=f, lang=lang, url=url, tool=tool, meta=meta, body=body)
 
 

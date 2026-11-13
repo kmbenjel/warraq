@@ -72,3 +72,13 @@ def test_resolve():
     assert r("safha/ar/index.md", "../media/a.webp") == "/safha/media/a.webp"
     assert r("safha/ar/index.md", "guides/crop") == "/safha/guides/crop/"
     assert r("safha/ar/index.md", "missing.md") is None
+
+
+def test_leading_h1_becomes_heading(tmp_path: Path):
+    from warraq_site.pages import _load
+
+    f = tmp_path / "x.md"
+    f.write_text("---\ntitle: قصير\n---\n\n# عنوانٌ أطول\n\nنص\n", encoding="utf-8")
+    p = _load("site/ar/x.md", f, "ar", "/x/", None)
+    assert p.meta["heading"] == "عنوانٌ أطول" and p.title == "قصير"
+    assert p.body.strip() == "نص"

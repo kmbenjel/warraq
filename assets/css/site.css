@@ -265,7 +265,8 @@ img { max-width: 100%; height: auto; }
 .side-box > summary::after { content: "▾"; margin-inline-start: auto; color: var(--muted); font-size: 0.85rem; transition: transform 160ms; }
 .side-box:not([open]) > summary::after { transform: rotate(90deg); }
 [dir="rtl"] .side-box:not([open]) > summary::after { transform: rotate(-90deg); }
-.side-box > summary span[dir="ltr"] { font-family: var(--mono); font-weight: 700; }
+.side-box > summary { flex-wrap: wrap; }
+.side-box > summary span[dir="ltr"] { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
 .side-box > summary small { color: var(--muted); font-weight: 400; font-size: 0.82rem; }
 .side-box .ticon { color: var(--accent); flex: none; }
 .side-nav ul, .side-tools { list-style: none; margin: 0; padding: 0 8px 8px; }

@@ -1,4 +1,4 @@
-# Builds the site from every tool's docs (shallow clones) and publishes it with GitHub Pages.
+# Builds the site from every tool's docs (shallow clones of the public repos) and publishes it with GitHub Pages.
 # Started by hand; uncomment the push trigger to deploy on every change.
 name: Pages
 on:

@@ -64,7 +64,7 @@ uvx planfs undo 001-sample-names
 uvx planfs apply plans/001-sample-names.tsv -t .
 ```
 
-صار المجلد هكذا:
+صارت الكتب في أقسامها، وحُذف المجلد `scans` بعد أن فرغ. وهذه شجرة المكتبة، دون الملفات الأخرى التي أنشأتها الخطوات السابقة:
 
 ```text
 my-library/

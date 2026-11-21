@@ -31,7 +31,7 @@
           <div>
             <h3>{{ s.title }}</h3>
             <p>{{ s.text }}</p>
-            {% if s.tools %}<p class="step-tools">{% for slug in s.tools %}{% for t in tools if t.slug == slug %}<a href="{{ t.url }}" class="chip">{{ tool_icon(slug, 16) }}<span dir="ltr">{{ slug }}</span></a>{% endfor %}{% endfor %}</p>{% endif %}
+            {% if s.tools %}<p class="step-tools">{% for slug in s.tools %}{% for t in tools if t.slug == slug and t.url %}<a href="{{ t.url }}" class="chip">{{ tool_icon(slug, 16) }}<span dir="ltr">{{ slug }}</span></a>{% endfor %}{% endfor %}</p>{% endif %}
           </div>
         </li>
         {% endfor %}
@@ -45,7 +45,7 @@
       <h2 id="tools-h">{{ m.cards.title }}</h2>
       <p class="band-lead">{{ m.cards.lead }}</p>
       <ul class="cards">
-        {% for t in tools %}
+        {% for t in tools if t.url %}
         <li class="card">
           <a href="{{ t.url }}" class="card-link">
             <div class="card-media{% if not t.card %} card-art{% endif %}">

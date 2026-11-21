@@ -134,7 +134,8 @@ def test_sync_from_git(site: Path, tmp_path: Path):
     cfg["sources"]["git"] = f"file://{tmp_path}/siblings/{{slug}}"
     reports = {r.slug: r for r in sync(site, cfg, mode="git")}
     assert reports["beta"].found and len(reports["beta"].pages) == 2
-    assert not reports["alpha"].found  # no such repository: drafts are used
+    assert not reports["alpha"].found and "could not clone" in reports["alpha"].error  # no such repository
+    assert reports["beta"].error == ""
     assert (site / ".cache/upstream/beta/ar/install.md").exists()
 
 
@@ -214,3 +215,34 @@ def test_nav_title_overrides_the_sidebar_label(site: Path):
     out = build(site).out
     nav = read(out / "tutorial/01-step/index.html").split('class="side-nav"', 1)[1].split("</nav>", 1)[0]
     assert ">مقدمة</a>" in nav and "<title>خطوة" in read(out / "tutorial/01-step/index.html")
+
+
+def test_strict_build_stops_when_a_repository_does_not_clone(site: Path, tmp_path: Path, capsys):
+    import subprocess
+
+    repo = tmp_path / "siblings" / "beta"
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "-C", str(repo)]
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run([*git, "add", "-A"], check=True)
+    subprocess.run([*git, "commit", "-qm", "docs"], check=True)
+    cfg = site / "site.yaml"
+    cfg.write_text(
+        cfg.read_text(encoding="utf-8").replace(
+            "https://example.invalid/{slug}.git", f"file://{tmp_path}/siblings/{{slug}}"
+        ),
+        encoding="utf-8",
+    )
+    # alpha has no repository to clone: a deploy must not go out on its drafts alone
+    assert main(["--root", str(site), "build", "--sync", "--from", "git", "--strict"]) == 1
+    assert "could not clone" in capsys.readouterr().err
+    assert main(["--root", str(site), "build", "--sync", "--from", "git"]) == 0
+
+
+def test_a_tool_without_pages_is_a_problem(site: Path):
+    import shutil
+
+    shutil.rmtree(site / "drafts/alpha")
+    (site / "content/ar/about.md").write_text("---\ntitle: عن\n---\nنص\n", encoding="utf-8")
+    res = build(site)
+    assert res.problems == ["alpha: no pages (no docs/ar in its repository and no draft in drafts/alpha/ar)"]
+    assert 'href="None"' not in read(res.out / "index.html")

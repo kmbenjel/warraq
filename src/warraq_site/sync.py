@@ -24,6 +24,7 @@ class ToolSync:
     pages: list[str] = field(default_factory=list)
     media: int = 0
     warnings: list[str] = field(default_factory=list)
+    error: str = ""  # set when the tool's repository could not be fetched (a build must not go on without it)
 
 
 def _copy_tree(src: Path, dst: Path) -> list[Path]:
@@ -40,10 +41,11 @@ def _copy_tree(src: Path, dst: Path) -> list[Path]:
     return copied
 
 
-def _checkout(slug: str, cfg: dict, root: Path, mode: str) -> Path | None:
+def _checkout(slug: str, cfg: dict, root: Path, mode: str) -> tuple[Path | None, str]:
+    """The tool's checkout and, when a clone failed, why."""
     if mode == "local":
         repo = (root / cfg["sources"]["local"] / slug).resolve()
-        return repo if repo.is_dir() else None
+        return (repo if repo.is_dir() else None), ""
     url = cfg["sources"]["git"].format(slug=slug)
     repo = root / ".cache" / "repos" / slug
     if repo.exists():
@@ -55,9 +57,10 @@ def _checkout(slug: str, cfg: dict, root: Path, mode: str) -> Path | None:
         text=True,
     )
     if r.returncode != 0:
-        return None
+        last = (r.stderr.strip().splitlines() or ["git clone failed"])[-1]
+        return None, f"could not clone {url}: {last}"
     subprocess.run(["git", "-C", str(repo), "sparse-checkout", "set", "docs"], capture_output=True)
-    return repo
+    return repo, ""
 
 
 def sync(root: Path, cfg: dict, mode: str = "local") -> list[ToolSync]:
@@ -69,7 +72,7 @@ def sync(root: Path, cfg: dict, mode: str = "local") -> list[ToolSync]:
         dst = upstream / slug
         if dst.exists():
             shutil.rmtree(dst)
-        repo = _checkout(slug, cfg, root, mode)
+        repo, rep.error = _checkout(slug, cfg, root, mode)
         if repo is None or not (repo / "docs").is_dir():
             results.append(rep)
             continue

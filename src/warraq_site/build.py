@@ -118,6 +118,11 @@ def build(root: Path, out: Path | None = None, *, drafts: bool = True, upstream:
         shutil.copy2(f, dst)
 
     res.problems += [p.meta["_error"] for p in all_pages if "_error" in p.meta]
+    res.problems += [
+        f"{slug}: no pages (no docs/ar in its repository and no draft in drafts/{slug}/ar)"
+        for slug in tools
+        if f"{slug}/ar/index.md" not in by_key
+    ]
     for p in all_pages:
         p.html, p.toc, probs = to_html(p.body, lambda href, p=p: P.resolve(p.key, href, by_key, media_sites), p.lang)
         res.problems += [f"{p.key}: {m}" for m in probs]

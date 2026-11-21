@@ -22,23 +22,30 @@ def _root(arg: str | None) -> Path:
 
 def cmd_sync(a) -> int:
     root = _root(a.root)
+    failed = 0
     for r in sync(root, load_config(root), a.source):
-        state = f"{len(r.pages)} pages, {r.media} media" if r.found else "no docs yet, drafts used"
+        state = (
+            f"{len(r.pages)} pages, {r.media} media" if r.found else "no docs of its own; this repo's drafts, if any"
+        )
         print(f"{r.slug:16} {state}")
         for w in r.warnings:
             print(f"{'':16} ! {w}")
-    return 0
+        if r.error:
+            failed += 1
+            print(f"{'':16} ! {r.error}", file=sys.stderr)
+    return 1 if failed else 0
 
 
 def cmd_build(a) -> int:
     root = _root(a.root)
-    if a.sync:
-        cmd_sync(a)
+    unfetched = cmd_sync(a) if a.sync else 0
     res = build(root, Path(a.out) if a.out else None, drafts=not a.no_drafts)
     print(f"built {res.pages} pages into {res.out} ({res.upstream} from the tools' repos, {res.drafts} drafts)")
     for p in res.problems:
         print(f"  ! {p}")
-    return 1 if (a.strict and res.problems) else 0
+    if unfetched:
+        print("  ! a tool's repository could not be fetched (see above)")
+    return 1 if (a.strict and (res.problems or unfetched)) else 0
 
 
 def cmd_serve(a) -> int:
@@ -79,7 +86,11 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--sync", action="store_true", help="run sync first")
     b.add_argument("--from", dest="source", choices=("local", "git"), default="local")
     b.add_argument("--no-drafts", action="store_true", help="leave out pages marked draft: true")
-    b.add_argument("--strict", action="store_true", help="exit 1 on any broken link or front-matter problem")
+    b.add_argument(
+        "--strict",
+        action="store_true",
+        help="exit 1 on a broken link, a front-matter problem, a tool without pages or a repository that did not clone",
+    )
     b.set_defaults(func=cmd_build)
 
     v = sub.add_parser("serve", help="preview the built site on 127.0.0.1")

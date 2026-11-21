@@ -86,8 +86,8 @@ MkDocs Material was the obvious candidate: mature, good RTL support, built-in se
    Eastern digits) and strip attached clitics (و ف ب ك ل ال) from the query. Material's search is built on lunr
    with per-language stemmers; matching our fold rule for rule would have meant a custom tokenizer inside a theme we
    do not control. Here the fold is one Python function and its JavaScript mirror, and a test runs both on the same
-   strings (`tests/test_textnorm.py`, with Node). The index is plain JSON (250 KB, 69 KB gzipped), fetched on
-   first search.
+   strings (`tests/test_textnorm.py`, with Node). The index is plain JSON (about 270 KB, 75 KB gzipped), fetched
+   on first search.
 2. **The sync-and-overlay model is the core need**: seven repositories own their pages, drafts fill the gaps, links
    are checked across repositories. That is a few dozen lines on top of a generator, and awkward as a plugin.
 3. **The family look, phone first, RTL first.** The pages share the palette of the library index and of
@@ -147,11 +147,11 @@ Measured on 2026-11-21 against the seven tools' checkouts, on Ubuntu 24.04 with 
 
 | Check | Script | Result |
 |---|---|---|
-| The walk-through runs as written | `scripts/check_walkthrough.py` | 23 commands in page order on a copy of the sample, all exit 0; the folder ends as the last page shows it |
-| Documented commands exist | `scripts/check_commands.py` | 208 commands on the tools' Arabic pages and on this site: every sub-command and option is in the tool's `--help` (`--readme` reads the English READMEs too) |
-| Pages render on a phone and a desktop | `scripts/audit_site.py --axe` | 78 pages at 390 px and 1366 px: no sideways scroll, no console error, no image without alt text, one `h1` each; axe-core 4.10 WCAG A/AA rules pass in the light and the dark theme |
+| The walk-through runs as written | `scripts/check_walkthrough.py` | 25 steps in page order on a copy of the sample, all exit 0; the folder ends as the last page shows it |
+| Documented commands exist | `scripts/check_commands.py` | 226 commands on the tools' Arabic pages and on this site: every sub-command and option is in the tool's `--help` (`--readme` reads the English READMEs too) |
+| Pages render on a phone and a desktop | `scripts/audit_site.py --axe` | 79 pages at 390 px and 1366 px: no sideways scroll, no console error, no image without alt text, one `h1` each; axe-core 4.10 WCAG A/AA rules pass in the light and the dark theme |
 | Arabic search finds what readers type | `scripts/audit_site.py` | six queries with a dropped hamza, a tāʾ marbūṭa as hāʾ, an attached «و» and «ال», full vocalisation and Arabic-Indic digits each find their page |
-| Links | `warraq-site build --strict`, `scripts/check_external_links.py` | internal links and anchors: 0 broken; 237 external links asked |
+| Links | `warraq-site build --strict`, `scripts/check_external_links.py` | internal links and anchors: 0 broken; 88 external links asked, none dead |
 
 ## Deploying
 

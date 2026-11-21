@@ -3,7 +3,8 @@
 
     python scripts/check_external_links.py [--site _site] [--also README.md ../safha/README.md …]
 
-Links are read from href/src attributes of the built pages (and from Markdown files given with --also).
+Links are read from href/src attributes of the built pages (and from Markdown files given with --also);
+the site's own address (its CNAME) is left out, since the build checks internal links itself.
 Each URL is asked once (HEAD, then GET when a server refuses HEAD). Exit status 1 when a link is dead.
 A 401/403/429 is reported as «refused» and does not fail the run: such servers turn robots away.
 """
@@ -45,9 +46,12 @@ def main() -> int:
     ap.add_argument("--also", type=Path, nargs="*", default=[], help="Markdown files to read links from as well")
     a = ap.parse_args()
     where: dict[str, set[str]] = {}
+    cname = a.site / "CNAME"
+    own = f"://{cname.read_text(encoding='utf-8').strip()}/" if cname.is_file() else None  # the site's own address
     for f in sorted(a.site.rglob("*.html")):
         for url in _ATTR.findall(f.read_text(encoding="utf-8")):
-            where.setdefault(url, set()).add(f.relative_to(a.site).as_posix())
+            if not (own and own in url + "/"):
+                where.setdefault(url, set()).add(f.relative_to(a.site).as_posix())
     for f in a.also:
         for groups in _MD.findall(f.read_text(encoding="utf-8")):
             where.setdefault(next(g for g in groups if g).rstrip(".,"), set()).add(str(f))

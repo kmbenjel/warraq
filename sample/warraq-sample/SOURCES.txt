@@ -1,2 +1,2 @@
-Texts (public domain): al-Nawawi (d. 676 AH), al-Arba'un, hadith 1; al-Shanfara (6th c. CE), Lamiyyat al-Arab, lines 1-4; Ibn Ajurrum (d. 723 AH), al-Ajurrumiyya, opening chapter.
+Texts (public domain): al-Nawawi (d. 676 AH), al-Arba'un, hadiths 1, 3, 5, 7, 9 and 13; al-Shanfara (6th c. CE), Lamiyyat al-Arab, lines 1-12; Ibn Ajurrum (d. 723 AH), al-Ajurrumiyya, the chapters on speech, inflection and the signs of inflection.
 Typeset and 'scanned' by make_sample.py in the warraq repository; released under CC0.

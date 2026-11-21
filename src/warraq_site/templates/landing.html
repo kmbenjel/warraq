@@ -77,7 +77,7 @@
     <div class="band-in">
       <h2 id="compare-h">{{ m.compare.title }}</h2>
       <p class="band-lead">{{ m.compare.lead }}</p>
-      <div class="table-wrap compare">
+      <div class="table-wrap compare" data-label="{{ m.compare.title }}">
         <table>
           <thead><tr>{% for h in m.compare.head %}<th scope="col">{{ h }}</th>{% endfor %}</tr></thead>
           <tbody>

@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import html
 import json
 import re
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import unquote
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -21,6 +23,9 @@ UI = {
         "search": "بحث",
         "search_ph": "ابحث في التوثيق…",
         "no_results": "لا نتائج. جرّب كلمة أخرى أو جذرها.",
+        "results": "نتائج البحث",
+        "results_count": "عدد النتائج: %d",
+        "close": "إغلاق",
         "theme": "تبديل السمة",
         "menu": "القائمة",
         "on_page": "في هذه الصفحة",
@@ -43,6 +48,9 @@ UI = {
         "search": "Search",
         "search_ph": "Search the docs…",
         "no_results": "No results. Try another word.",
+        "results": "Search results",
+        "results_count": "%d results",
+        "close": "Close",
         "theme": "Toggle theme",
         "menu": "Menu",
         "on_page": "On this page",
@@ -111,7 +119,7 @@ def build(root: Path, out: Path | None = None, *, drafts: bool = True, upstream:
 
     res.problems += [p.meta["_error"] for p in all_pages if "_error" in p.meta]
     for p in all_pages:
-        p.html, p.toc, probs = to_html(p.body, lambda href, p=p: P.resolve(p.key, href, by_key, media_sites))
+        p.html, p.toc, probs = to_html(p.body, lambda href, p=p: P.resolve(p.key, href, by_key, media_sites), p.lang)
         res.problems += [f"{p.key}: {m}" for m in probs]
 
     env = Environment(
@@ -152,7 +160,7 @@ def build(root: Path, out: Path | None = None, *, drafts: bool = True, upstream:
         items: list[dict] = []
         guides: dict | None = None
         for q in groups[(p.lang, p.section)]:
-            label = q.title
+            label = str(q.meta.get("nav_title") or q.title)
             if p.tool and q.stem in cfg["tool_pages"] and "/" not in q.rel and p.lang == "ar":
                 label = cfg["tool_pages"][q.stem]
             entry = {"title": label, "url": q.url, "current": q is p}
@@ -171,6 +179,70 @@ def build(root: Path, out: Path | None = None, *, drafts: bool = True, upstream:
         for n in nav:
             o += n.get("children", [n])
         return o
+
+    def social_image(p: P.Page) -> dict | None:
+        """The picture a shared link shows: the tool's own card on its pages, the site's card elsewhere."""
+        if p.tool:
+            for ext in ("png", "jpg", "webp"):
+                if f"{p.tool}/media/card.{ext}" in media:
+                    return {"url": f"{site_url}/{media[f'{p.tool}/media/card.{ext}'][0]}"}
+        if (root / "assets" / "img" / "social.png").is_file():
+            return {"url": f"{site_url}/assets/img/social.png", "w": 1200, "h": 630}
+        return None
+
+    def top_nav(lang: str) -> list[dict]:
+        """Header links; a page that exists only in Arabic is linked as such from the English pages."""
+        items = [{"label": UI[lang]["tools"], "url": ("/en/" if lang == "en" else "/") + "#tools", "lang": None}]
+        for label, rel in (("tutorial", "tutorial/index.md"), ("about", "about.md")):
+            q = by_key.get(f"site/{lang}/{rel}") or by_key.get(f"site/ar/{rel}")
+            if q:
+                items.append({"label": UI[lang][label], "url": q.url, "lang": q.lang if q.lang != lang else None})
+        return items
+
+    def crumbs(p: P.Page) -> list[tuple[str, str]]:
+        """(name, URL) from the home page down to this page, for the structured data."""
+        home = by_key.get(f"site/{p.lang}/index.md") or by_key["site/ar/index.md"]
+        trail = [(cfg["title"] if p.lang == "ar" else cfg["title_en"], home.url)]
+        if p.tool:
+            idx = by_key.get(f"{p.tool}/{p.lang}/index.md")
+            if idx and idx is not p:
+                trail.append((p.tool, idx.url))
+        elif p.section:
+            idx = by_key.get(f"site/{p.lang}/{p.section}/index.md")
+            if idx and idx is not p:
+                trail.append((idx.title, idx.url))
+        if p.url != home.url:
+            trail.append((p.tool if p.tool and p.stem == "index" and "/" not in p.rel else p.title, p.url))
+        return trail
+
+    def json_ld(p: P.Page, description: str) -> str:
+        if p.meta.get("layout") == "landing":
+            data: dict = {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": cfg["title"] if p.lang == "ar" else cfg["title_en"],
+                "alternateName": cfg["title_en"] if p.lang == "ar" else cfg["title"],
+                "url": site_url + p.url,
+                "inLanguage": p.lang,
+                "description": description,
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": {"@type": "EntryPoint", "urlTemplate": site_url + p.url + "?q={search_term_string}"},
+                    "query-input": "required name=search_term_string",
+                },
+            }
+        else:
+            trail = crumbs(p)
+            data = {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {"@type": "ListItem", "position": i, "name": name, "item": site_url + url}
+                    for i, (name, url) in enumerate(trail, 1)
+                ],
+            }
+        # "</" must not appear inside a <script> element.
+        return json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
     def twin(p: P.Page) -> str | None:
         other = "en" if p.lang == "ar" else "ar"
@@ -211,12 +283,16 @@ def build(root: Path, out: Path | None = None, *, drafts: bool = True, upstream:
             "v": version,
             "canonical": site_url + p.url,
             "description": p.meta.get("description") or cfg["description" if p.lang == "ar" else "description_en"],
+            "site_url": site_url,
+            "image": social_image(p),
+            "top_nav": top_nav(p.lang),
         }
+        ctx["json_ld"] = json_ld(p, ctx["description"])
         template = "landing.html" if p.meta.get("layout") == "landing" else "page.html"
-        html = env.get_template(template).render(**ctx)
+        rendered = env.get_template(template).render(**ctx)
         dst = out / p.url.strip("/") / "index.html" if p.url != "/" else out / "index.html"
         dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_text(html, encoding="utf-8")
+        dst.write_text(rendered, encoding="utf-8")
         res.pages += 1
         res.drafts += p.draft
         res.upstream += p.upstream
@@ -255,8 +331,12 @@ def build(root: Path, out: Path | None = None, *, drafts: bool = True, upstream:
         twin=None,
         page=None,
         tools=[tool_info(s, "ar") for s in tools],
-        canonical=site_url + "/404.html",
+        canonical=None,
         description=cfg["description"],
+        site_url=site_url,
+        image=None,
+        top_nav=top_nav("ar"),
+        json_ld=None,
         toc=[],
         nav=[],
     )
@@ -273,21 +353,41 @@ def build(root: Path, out: Path | None = None, *, drafts: bool = True, upstream:
     return res
 
 
-_HREF = re.compile(r'(?:href|src)="(/[^"#?]*)')
+_HREF = re.compile(r'(?:href|src)="(/[^"#?]*)(?:\?[^"#]*)?(#[^"]*)?"')
+_SAME_PAGE = re.compile(r'href="#([^"]+)"')
+_ID = re.compile(r'\sid="([^"]+)"')
+
+
+def _target(out: Path, path: str) -> Path | None:
+    """The file a root-relative URL is served from, or None when there is none."""
+    f = out / path.lstrip("/")
+    if path.endswith("/") or not f.is_file():
+        f = f / "index.html"
+    return f if f.is_file() else None
 
 
 def check_links(out: Path) -> list[str]:
-    """Every root-relative link in the output must point at a file that exists."""
+    """Every root-relative link in the output must hit a file, and every #fragment an id on the page it names."""
     problems = []
+    ids: dict[Path, set[str]] = {}
+
+    def has_id(page: Path, frag: str) -> bool:
+        if page not in ids:
+            ids[page] = set(_ID.findall(page.read_text(encoding="utf-8")))
+        return unquote(html.unescape(frag)) in ids[page] or frag in ids[page]
+
     for f in sorted(out.rglob("*.html")):
-        for target in set(_HREF.findall(f.read_text(encoding="utf-8"))):
+        text = f.read_text(encoding="utf-8")
+        name = f.relative_to(out).as_posix()
+        for target, frag in sorted(set(_HREF.findall(text))):
             if target.startswith("//"):
                 continue
-            path = out / target.lstrip("/")
-            if target.endswith("/"):
-                ok = (path / "index.html").is_file()
-            else:
-                ok = path.is_file() or (path / "index.html").is_file()
-            if not ok:
-                problems.append(f"{f.relative_to(out).as_posix()}: broken link {target}")
+            page = _target(out, target)
+            if page is None:
+                problems.append(f"{name}: broken link {target}")
+            elif frag and len(frag) > 1 and page.suffix == ".html" and not has_id(page, frag[1:]):
+                problems.append(f"{name}: broken link {target}{frag} (no such heading)")
+        for frag in sorted(set(_SAME_PAGE.findall(text))):
+            if not has_id(f, frag):
+                problems.append(f"{name}: broken link #{frag} (no such heading)")
     return problems

@@ -136,3 +136,81 @@ def test_sync_from_git(site: Path, tmp_path: Path):
     assert reports["beta"].found and len(reports["beta"].pages) == 2
     assert not reports["alpha"].found  # no such repository: drafts are used
     assert (site / ".cache/upstream/beta/ar/install.md").exists()
+
+
+def test_head_for_search_engines_and_shared_links(site: Path):
+    (site / "assets").unlink()  # the fixture links the real assets; this test wants its own
+    (site / "assets/img").mkdir(parents=True)
+    (site / "assets/img/social.png").write_bytes(b"\x89PNG\r\n")
+    sync(site, load_config(site))
+    out = build(site).out
+    home = read(out / "index.html")
+    assert '<meta property="og:image" content="https://docs.example.org/assets/img/social.png">' in home
+    assert '<meta name="twitter:card" content="summary_large_image">' in home
+    assert '<meta property="og:type" content="website">' in home
+    ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', home, re.S).group(1))
+    assert ld["@type"] == "WebSite" and ld["potentialAction"]["target"]["urlTemplate"].endswith(
+        "/?q={search_term_string}"
+    )
+    beta = read(out / "beta/install/index.html")
+    assert (
+        '<meta property="og:image" content="https://docs.example.org/beta/media/card.png">' in beta
+    )  # the tool's card
+    assert '<meta property="og:type" content="article">' in beta
+    ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', beta, re.S).group(1))
+    assert [i["name"] for i in ld["itemListElement"]] == ["ورّاق", "beta", "التثبيت"]
+    assert ld["itemListElement"][1]["item"] == "https://docs.example.org/beta/"
+    nf = read(out / "404.html")
+    assert '<meta name="robots" content="noindex">' in nf and 'rel="canonical"' not in nf
+    assert "hreflang" not in beta  # no English twin, no alternates
+
+
+def test_language_alternates_and_header_links(site: Path):
+    en = site / "content/en"
+    en.mkdir(parents=True)
+    ar_landing = (site / "content/ar/index.md").read_text(encoding="utf-8")
+    (en / "index.md").write_text(ar_landing.replace("(about.md)", "(../ar/about.md)"), encoding="utf-8")
+    res = build(site)
+    assert res.problems == []
+    ar, eng = read(res.out / "index.html"), read(res.out / "en/index.html")
+    for page in (ar, eng):
+        assert '<link rel="alternate" hreflang="ar" href="https://docs.example.org/">' in page
+        assert '<link rel="alternate" hreflang="en" href="https://docs.example.org/en/">' in page
+        assert '<link rel="alternate" hreflang="x-default" href="https://docs.example.org/">' in page
+    # the walk-through exists in Arabic only: the English header says so, the Arabic one does not
+    assert '<a href="/tutorial/" hreflang="ar" lang="ar">' in eng
+    assert '<a href="/tutorial/">' in ar
+    assert '<a href="/en/#tools">' in eng
+
+
+def test_wide_tables_and_heading_links(site: Path):
+    tables = "|أ|ب|ج|د|\n|-|-|-|-|\n|1|2|3|4|\n\n|أ|ب|\n|-|-|\n|1|2|\n\n"
+    body = f"## قسم\n\n{tables}[إلى القسم](#قسم) [وإلى ألف](/alpha/faq/#سؤال)\n"
+    (site / "content/ar/about.md").write_text(f"---\ntitle: عن\n---\n{body}", encoding="utf-8")
+    res = build(site)
+    assert res.problems == []
+    html = read(res.out / "about/index.html")
+    assert '<div class="table-wrap wide" data-label="جدول"><table style="--cols:4">' in html
+    assert '<div class="table-wrap" data-label="جدول"><table>' in html
+    assert 'aria-label="رابط هذا القسم"' in html
+
+
+def test_broken_fragments_are_reported(site: Path):
+    body = "## قسم\n\n[لا قسم](#غائب) [ولا سؤال](/alpha/faq/#غائب) [صحيح](/alpha/faq/#سؤال)\n"
+    (site / "content/ar/about.md").write_text(f"---\ntitle: عن\n---\n{body}", encoding="utf-8")
+    res = build(site)
+    assert sorted(res.problems) == [
+        "about/index.html: broken link #غائب (no such heading)",
+        "about/index.html: broken link /alpha/faq/#غائب (no such heading)",
+    ]
+
+
+def test_nav_title_overrides_the_sidebar_label(site: Path):
+    f = site / "content/ar/tutorial/index.md"
+    f.write_text(
+        f.read_text(encoding="utf-8").replace("title: دليل عملي", "title: دليل عملي\nnav_title: مقدمة"),
+        encoding="utf-8",
+    )
+    out = build(site).out
+    nav = read(out / "tutorial/01-step/index.html").split('class="side-nav"', 1)[1].split("</nav>", 1)[0]
+    assert ">مقدمة</a>" in nav and "<title>خطوة" in read(out / "tutorial/01-step/index.html")

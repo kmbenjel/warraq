@@ -17,16 +17,29 @@ _EXTERNAL = re.compile(r"^(?:[a-z][a-z0-9+.-]*:|//|#)", re.I)
 _LTR_SCRIPT = re.compile(r"^[\x00-˿ -⁯]*$")
 
 
+LABELS = {
+    "ar": {"table": "جدول", "anchor": "رابط هذا القسم"},
+    "en": {"table": "Table", "anchor": "Link to this section"},
+}
+
+
 class _Links(Treeprocessor):
-    def __init__(self, md, resolver: Resolver, problems: list[str]):
+    def __init__(self, md, resolver: Resolver, problems: list[str], lang: str = "ar"):
         super().__init__(md)
         self.resolver = resolver
         self.problems = problems
+        self.labels = LABELS.get(lang, LABELS["ar"])
 
     def run(self, root: ET.Element) -> None:
         tables = [(parent, i, el) for parent in root.iter() for i, el in enumerate(parent) if el.tag == "table"]
         for parent, i, el in reversed(tables):
-            wrap = ET.Element("div", {"class": "table-wrap"})
+            # A table scrolls sideways inside its wrapper. site.js makes the wrapper a named, focusable region
+            # when it really overflows, so that the keyboard can scroll it; data-label is the name it gets.
+            wrap = ET.Element("div", {"class": "table-wrap", "data-label": self.labels["table"]})
+            cols = max((len(row) for row in el.iter("tr")), default=0)
+            if cols >= 4:  # wide tables keep readable columns on a phone and scroll (see .table-wrap in site.css)
+                el.set("style", f"--cols:{cols}")
+                wrap.set("class", "table-wrap wide")
             parent.remove(el)
             wrap.append(el)
             parent.insert(i, wrap)
@@ -56,26 +69,28 @@ class _Links(Treeprocessor):
 
 
 class LinkExtension(Extension):
-    def __init__(self, resolver: Resolver, problems: list[str]):
+    def __init__(self, resolver: Resolver, problems: list[str], lang: str = "ar"):
         super().__init__()
         self.resolver = resolver
         self.problems = problems
+        self.lang = lang
 
     def extendMarkdown(self, md):  # noqa: N802 (Markdown API)
-        md.treeprocessors.register(_Links(md, self.resolver, self.problems), "warraq_links", 1)
+        md.treeprocessors.register(_Links(md, self.resolver, self.problems, self.lang), "warraq_links", 1)
 
 
-def to_html(body: str, resolver: Resolver) -> tuple[str, list, list[str]]:
+def to_html(body: str, resolver: Resolver, lang: str = "ar") -> tuple[str, list, list[str]]:
     """Return (html, toc tokens, problems)."""
     problems: list[str] = []
+    anchor = LABELS.get(lang, LABELS["ar"])["anchor"]
     md = markdown.Markdown(
-        extensions=["extra", "admonition", "sane_lists", "toc", LinkExtension(resolver, problems)],
+        extensions=["extra", "admonition", "sane_lists", "toc", LinkExtension(resolver, problems, lang)],
         extension_configs={
             "toc": {
                 "slugify": slugify_unicode,
                 "permalink": "#",
                 "permalink_class": "anchor",
-                "permalink_title": "رابط هذا القسم",
+                "permalink_title": anchor,
                 "toc_depth": "2-3",
             }
         },
@@ -84,6 +99,8 @@ def to_html(body: str, resolver: Resolver) -> tuple[str, list, list[str]]:
     html = md.convert(body)
     html = re.sub(r'<pre><code class="language-([\w-]+)">', r'<pre dir="ltr"><code class="language-\1">', html)
     html = html.replace("<pre><code>", '<pre dir="ltr"><code>')
+    # The permalink's visible text is "#": give it a name a screen reader can say.
+    html = html.replace('<a class="anchor" ', f'<a class="anchor" aria-label="{anchor}" ')
     return html, md.toc_tokens, problems
 
 

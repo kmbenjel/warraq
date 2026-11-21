@@ -20,10 +20,29 @@
   var side = document.querySelector("[data-side]");
   if (side && matchMedia("(max-width: 899px)").matches) side.removeAttribute("open");
 
+  /* A table wider than its box scrolls sideways: make that box a named region the keyboard can reach and scroll. */
+  var wraps = document.querySelectorAll(".table-wrap");
+  function markScrollable() {
+    wraps.forEach(function (w) {
+      if (w.scrollWidth > w.clientWidth + 1) {
+        w.tabIndex = 0; w.setAttribute("role", "region");
+        if (w.dataset.label) w.setAttribute("aria-label", w.dataset.label);
+      } else {
+        w.removeAttribute("tabindex"); w.removeAttribute("role"); w.removeAttribute("aria-label");
+      }
+    });
+  }
+  if (wraps.length) {
+    markScrollable();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(markScrollable);
+    window.addEventListener("resize", markScrollable);
+  }
+
   /* Copy buttons on code blocks. */
   document.querySelectorAll(".prose pre").forEach(function (pre) {
     var b = document.createElement("button");
     b.type = "button"; b.className = "copy"; b.textContent = ar ? "نسخ" : "Copy";
+    b.setAttribute("aria-live", "polite");
     b.addEventListener("click", function () {
       var text = pre.querySelector("code") ? pre.querySelector("code").innerText : pre.innerText;
       navigator.clipboard.writeText(text.replace(/\n$/, "")).then(function () {
@@ -96,8 +115,9 @@
   var input = document.getElementById("q");
   var list = document.getElementById("results");
   var empty = document.getElementById("no-results");
+  var status = document.getElementById("search-status");
   var script = document.querySelector("script[data-index]");
-  var index = null, loading = null, sel = -1;
+  var index = null, loading = null;
 
   function load() {
     if (index || loading) return loading;
@@ -123,8 +143,8 @@
 
   function run() {
     var q = fold(input.value);
-    list.innerHTML = ""; sel = -1;
-    if (!q) { empty.hidden = true; return; }
+    list.innerHTML = "";
+    if (!q) { empty.hidden = true; if (status) status.textContent = ""; return; }
     var terms = q.split(" ").map(stem);
     var hits = [];
     index.forEach(function (e) {
@@ -151,14 +171,14 @@
       list.appendChild(li);
     });
     empty.hidden = hits.length > 0;
+    if (status) status.textContent = hits.length ? status.dataset.count.replace("%d", Math.min(hits.length, 20)) : empty.textContent;
   }
+  /* Arrow keys walk from the box down the results and back; the focused result is a plain link, so Enter opens it. */
   function move(step) {
-    var links = list.querySelectorAll("a");
-    if (!links.length) return;
-    if (sel >= 0) links[sel].removeAttribute("aria-selected");
-    sel = (sel + step + links.length) % links.length;
-    links[sel].setAttribute("aria-selected", "true");
-    links[sel].scrollIntoView({ block: "nearest" });
+    var links = Array.prototype.slice.call(list.querySelectorAll("a"));
+    var at = links.indexOf(document.activeElement) + step;
+    if (at < 0) { input.focus(); return; }
+    if (at < links.length) { links[at].focus(); links[at].scrollIntoView({ block: "nearest" }); }
   }
   function open() {
     if (!dlg || dlg.open) return;
@@ -168,12 +188,14 @@
   document.querySelectorAll("[data-search-open]").forEach(function (b) { b.addEventListener("click", open); });
   if (dlg) {
     input.addEventListener("input", function () { load().then(run); });
-    input.addEventListener("keydown", function (e) {
+    dlg.addEventListener("keydown", function (e) {
       if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
       else if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
-      else if (e.key === "Enter") {
-        var links = list.querySelectorAll("a");
-        if (links.length) { e.preventDefault(); location.href = links[Math.max(sel, 0)].href; dlg.close(); }
+      else if (e.key === "Escape") { e.preventDefault(); dlg.close(); } /* a search field would only clear itself */
+      else if (e.key === "Enter" && e.target === input) {
+        var first = list.querySelector("a");
+        e.preventDefault();
+        if (first) { location.href = first.href; dlg.close(); }
       }
     });
     dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });

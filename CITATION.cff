@@ -1,5 +1,6 @@
 cff-version: 1.2.0
 message: If you cite the Warraq tools or their documentation, please cite it as below.
+type: software
 title: "Warraq: open tools for digital heritage libraries (documentation site)"
 authors:
   - family-names: Benjelloun

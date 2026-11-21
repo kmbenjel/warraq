@@ -1,0 +1,22 @@
+name: خلل في الموقع · A fault in the site
+description: عرضٌ مختلّ على هاتف أو حاسوب، أو بحثٌ لا يجد ما ينبغي أن يجده. A page that renders badly, or a search that misses what it should find.
+labels: [bug]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: رابط الصفحة · Page address
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: ما الذي رأيته، وما الذي توقّعته؟ · What did you see, and what did you expect?
+      description: للبحث اذكر الكلمة كما كتبتها. For search, give the query exactly as typed. لقطة شاشة تنفع. A screenshot helps.
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: المتصفح والجهاز · Browser and device
+      placeholder: Chrome 131 على Android 14 · Firefox on Linux

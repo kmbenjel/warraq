@@ -1,0 +1,23 @@
+name: خطأ في صفحة · A page is wrong
+description: أمرٌ لا يعمل كما في الصفحة، أو عبارةٌ غير واضحة، أو رابطٌ مكسور. A command that does not work as written, an unclear sentence, a broken link.
+labels: [docs]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: رابط الصفحة · Page address
+      placeholder: https://warraq.benjelloun.dev/tutorial/02-clean/
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: ما الخطأ، وما الصواب إن عرفته؟ · What is wrong, and what should it say?
+      description: إن كان أمرًا فانسخه وانسخ ما طبعته الأداة. For a command, paste it and what the tool printed.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: إصدار الأداة · Tool version
+      description: ما يطبعه مثلًا `safha --version`. The output of, say, `safha --version`.

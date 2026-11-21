@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: مشكلة في أداة لا في الموقع · A problem with a tool, not with the site
+    url: https://github.com/kmbenjel?tab=repositories
+    about: كل أداة لها مستودعها وصفحة مسائلها (safha، arabic-bib، turath-match، turath-catalog، planfs، pocketshelf، agent-workbench). Each tool has its own repository and issues.
+  - name: الوثائق · The documentation
+    url: https://warraq.benjelloun.dev/
+    about: التثبيت والبدء السريع والأدلة والأسئلة الشائعة لكل أداة، والدليل العملي. Install, quickstart, guides, FAQ and the walk-through.

@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: "22"
       - run: pip install -e ".[dev]"
-      - run: ruff check src tests sample
-      - run: ruff format --check src tests sample
+      - run: ruff check src tests sample scripts
+      - run: ruff format --check src tests sample scripts
       - run: pytest --cov=warraq_site --cov-report=term-missing
       - run: warraq-site build --strict

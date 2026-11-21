@@ -10,7 +10,23 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "Khalid Benjelloun" }]
+keywords = ["arabic", "documentation", "static-site-generator", "rtl", "digital-library"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Documentation",
+    "Natural Language :: Arabic",
+]
 dependencies = ["markdown>=3.5", "pyyaml>=6", "jinja2>=3.1"]
+
+[project.urls]
+Homepage = "https://github.com/kmbenjel/warraq"
+Documentation = "https://warraq.benjelloun.dev/"
+Issues = "https://github.com/kmbenjel/warraq/issues"
+Changelog = "https://github.com/kmbenjel/warraq/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-cov", "ruff>=0.6"]

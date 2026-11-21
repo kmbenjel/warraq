@@ -43,7 +43,9 @@ warraq-site serve             # http://127.0.0.1:8765/
 pytest && ruff check src tests sample scripts
 ```
 
-`warraq-site build --strict` fails on any broken link or anchor and on bad front matter; CI runs it.
+`warraq-site build --strict` fails on any broken link or anchor and on bad front matter; CI runs it. Without the
+sibling checkouts, `warraq-site build --sync --from git --strict` takes the tools' pages from their public
+repositories, as CI does.
 
 Before a change to the walk-through or after a tool changes its command line, with the tools' checkouts (each with
 its `.venv`) next to this repository:

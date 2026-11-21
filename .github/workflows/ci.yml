@@ -20,4 +20,5 @@ jobs:
       - run: ruff check src tests sample scripts
       - run: ruff format --check src tests sample scripts
       - run: pytest --cov=warraq_site --cov-report=term-missing
-      - run: warraq-site build --strict
+      # the tools' pages come from their public repositories, as in the Pages workflow
+      - run: warraq-site build --sync --from git --strict
